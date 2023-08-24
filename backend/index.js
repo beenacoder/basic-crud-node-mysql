@@ -7,7 +7,7 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-//Connecting to the database
+//CONNECT to the database
 const db = mysql.createConnection({
     host:"localhost",
     user:"root",
@@ -19,7 +19,7 @@ app.get('/', (req, res) => {
     res.json("This is the home page")
 })
 
-//getting all the books from the database
+//GET all the books from the database
 app.get('/books', (req, res) => {
     const q = "SELECT * FROM books";
     db.query(q,(err, data)=>{
@@ -28,7 +28,7 @@ app.get('/books', (req, res) => {
     })
 })
 
-//Insert new books
+//CREATE new books
 app.post("/books", (req, res)=>{
     const q = "INSERT INTO books (`title`,`desc`,`price`,`cover`) VALUES (?)";
     const values = [
@@ -39,18 +39,36 @@ app.post("/books", (req, res)=>{
     ];
     db.query(q, [values], (err, data)=>{
         if(err) return res.json(err);
-        return res.json("Data cambio");
+        return res.json("Book has been added to the database");
     });
 });
 
-//Deleting a book by Id
+//DELETE a book by Id
 app.delete("/books/:id", (req, res) => {
     const bookId = req.params.id;
     const q = "DELETE FROM books WHERE id = ?";
 
     db.query(q, [bookId], (err, data) => {
         if(err) return res.json(err);
-        return res.json("Data borro");
+        return res.json("Book deleted successfully");
+    })
+});
+
+//UPDATE a book by Id
+app.put("/books/:id", (req, res) => {
+    const bookId = req.params.id;
+    const q = "UPDATE books SET `title` = ?, `desc` = ?, `price` = ?, `cover` = ?, WHERE id = ?";
+
+    const values = [
+        req.body.title,
+        req.body.desc,
+        req.body.price,
+        req.body.cover,
+    ];
+
+    db.query(q, [...values, bookId], (err, data) => {
+        if(err) return res.json(err);
+        return res.json("The book has been updated successfully");
     })
 });
 
